@@ -10,51 +10,49 @@ const MongoStore = require('connect-mongo');
 const expressSession = require('express-session');
 const mongoose = require('mongoose');
 
-const connectDB = require('./server/config/db')
-const { isActiveRoute } =  require('./server/helpers/routeHelpers');
-
-//connnect to DB
+// Connect to MongoDB
 const mongoURI = process.env.MONGODB_URI;
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
     console.log('Connected to MongoDB');
+
+    // Session store configuration should be inside the connection callback
+    app.use(expressSession({
+        secret: process.env.EXPRESS_SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create({
+            client: mongoose.connection.getClient()
+        }),
+    }));
+
+    // Start the server after the database connection
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+
 }).catch(err => {
     console.error('Failed to connect to MongoDB', err);
 });
-connectDB();
 
+// Other middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(methodOverride('_method'));
 
-// Session store configuration
-app.use(expressSession({
-    secret: process.env.EXPRESS_SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        client: mongoose.connection.getClient()
-    }),
-}))
-
-
-
 // Templating engine
 app.use(expressLayout);
-app.set('layout', './layouts/main')
+app.set('layout', './layouts/main');
 app.set('view engine', 'ejs');
 
+const { isActiveRoute } = require('./server/helpers/routeHelpers');
 app.locals.isActiveRoute = isActiveRoute;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', require("./server/routes/main"));
 app.use('/', require("./server/routes/admin"));
-
-const PORT = 3000 || process.env.PORT; 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});

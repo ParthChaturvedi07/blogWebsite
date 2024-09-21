@@ -32,8 +32,8 @@ app.use(methodOverride('_method'));
 
 app.use(expressSession({
     secret: process.env.EXPRESS_SESSION_SECRET,
-    resave: 'false',
-    saveUninitialized: 'false',
+    resave: false,
+    saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.MONGODB_URI
     }),

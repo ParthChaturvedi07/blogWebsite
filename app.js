@@ -56,3 +56,4 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', require("./server/routes/main"));
 app.use('/', require("./server/routes/admin"));
+

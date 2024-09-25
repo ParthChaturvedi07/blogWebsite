@@ -18,7 +18,6 @@ mongoose.connect(mongoURI, {
 }).then(() => {
     console.log('Connected to MongoDB');
 
-    // Session store configuration should be inside the connection callback
     app.use(expressSession({
         secret: process.env.EXPRESS_SESSION_SECRET,
         resave: false,
@@ -28,7 +27,6 @@ mongoose.connect(mongoURI, {
         }),
     }));
 
-    // Start the server after the database connection
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
